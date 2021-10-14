@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+   name: challenge-1
+spec:
+   containers:
+   - name: challenge-1
+     image: attgua/challenge:0.1
+     ports:
+     - containerPort: 6379
