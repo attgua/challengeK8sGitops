@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: multicontainer-pod2
+  name: multicontainer-pod2
+spec:
+
+  volumes:
+  - name: shared-data
+    emptyDir: {}
+
+  containers: 
+
+  - image: nginx
+    name: nginx
+    ports:
+    - containerPort: 80
+    resources: {}
+    volumeMounts:
+    - name: shared-data
+      mountPath: /usr/share/nginx/html
+
+  - image: busybox
+    name: busy
+    volumeMounts:
+    - name: shared-data
+      mountPath: /pod-data
+    args:
+    - bin/sh
+    - -c
+    - echo hello world; ls; echo Hello from the busybox container > /pod-data/index.html ; sleep 3600
+
+  restartPolicy: Always
+
+
+--- 
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: exposition-service
+  name: exposition-service
+  namespace: default
+spec:
+  ports:
+  - nodePort: 30991
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    run: multicontainer-pod2
+  sessionAffinity: None
+  type: LoadBalancer
+status:
+  loadBalancer: {}
