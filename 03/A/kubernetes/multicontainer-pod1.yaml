@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: multicontainer-pod1
+  name: multicontainer-pod1
+spec:
+
+  volumes:
+  - name: shared-data
+    emptyDir: {}
+
+  containers: 
+
+  - image: attgua/python-write:0.9
+    name: python-write
+    volumeMounts:
+    - name: shared-data
+      mountPath: /app
+
+  - image: attgua/python-execute:0.13
+    name: python-execute
+    ports:
+    - containerPort: 80
+    resources: {}
+    volumeMounts:
+    - name: shared-data
+      mountPath: /home
+  
+  restartPolicy: Never
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-python-service
+spec:
+  selector:
+    app: multicontainer-pod1
+  ports:
+  - protocol: "TCP"
+    port: 6000
+    targetPort: 5000
+    nodePort: 30992
+  type: LoadBalancer
+

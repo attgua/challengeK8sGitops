@@ -1,16 +1,21 @@
-Deploy a container from scratch.
+## Deploy a container from scratch.
 
 
-create Dockerfile
+- Create Dockerfile
 
-build and push Dockerfile on DockerHub
+- Build and push Dockerfile on DockerHub
+
+```
 
 -> docker build -t attgua/challenge  . 
 -> docker tag attgua/challenge attgua/challenge:0.1
 
 -> docker push attgua/challenge:0.1
 
-use the image in a pod like:
+```
+- Use the image in a pod:
+
+```
 
 apiVersion: v1
 kind: Pod
@@ -23,4 +28,12 @@ spec:
      ports:
      - containerPort: 6379
 
+```
 
+- execute a multicontainer pod
+
+```
+
+k exec pod_name --container container_name -i -t -- bin/sh
+
+```
