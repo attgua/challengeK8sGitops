@@ -11,24 +11,29 @@ spec:
     emptyDir: {}
 
   containers: 
-
-  - image: attgua/python-write:0.9
+  - image: attgua/python-write:0.15
     name: python-write
     volumeMounts:
     - name: shared-data
-      mountPath: /app
+      mountPath: /home
+    args:
+    - bin/sh
+    - -c
+    - cp app/main.py home/main.py ; cp app/requirements.txt home/requirements.txt ; cp usr/local/bin/flask /home/flask ; sleep 3600
 
-  - image: attgua/python-execute:0.13
-    name: python-execute
+  - name: python-execute
     ports:
-    - containerPort: 80
+    - containerPort: 5000
     resources: {}
     volumeMounts:
     - name: shared-data
-      mountPath: /home
-  
+      mountPath: /app
+    image: attgua/python-execute:0.15
+    args:
+    - /bin/sh
+    - -c
+    - cp /app/flask /usr/local/bin/flask; pip3 install -r /app/requirements.txt; python3 /app/main.py ; sleep 3600
   restartPolicy: Never
-
 
 ---
 apiVersion: v1
@@ -42,6 +47,4 @@ spec:
   - protocol: "TCP"
     port: 6000
     targetPort: 5000
-    nodePort: 30992
   type: LoadBalancer
-

@@ -22,6 +22,12 @@
         - the second container named `python-execute` has the image `attgua/python-execute:0.1` builded with the third dockerfile.
         - the service `hello-python-service` is used to expose the application on the port `30992` so its visible outside the cluster.
 
+  * It is an anti-pattern because:
+    - The minimum unit controlled by k8s is the pod so having multiple images in the same pod bring to different problems like:
+      - if only one image is not working correctly we have to kill them all by restarting the pod even if they work correctly.
+      - Replication of equal units scales worse
+      - Having images that do different things within the same block is inconvenient during the checking or troubleshooting phase.
+      - However it works but it is indeed an anti-pattern. What is typically worthwhile is to keep a 1-1 image pod report (Excluding those automatically generated such as that of the ip address etc).
 
 - One pod should have a container that prepares the file exposed on a Port by the other container, which runs nginx.
 

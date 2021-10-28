@@ -1,4 +1,4 @@
-# Expose nginx container
+## Expose nginx container
 
 Already implemented in point 3B for test operations.
 The service (part of the multicontainer-pod2 file) exposes nginx on port 30991.

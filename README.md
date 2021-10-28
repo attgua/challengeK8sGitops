@@ -3,8 +3,8 @@
 1. Deploy a container from scratch.
 2. Check the Image version without the describe command.
 3. Create multi-container Pods, which containers share a directory.
-  A. One pod should have both containers that run python. The First should install requirements, the second should run an application using those requirements. Describe your choices and describe why It Is an anti-pattern.
-  B. One pod should have a container that prepares the file exposed on a Port by the other container, which runs nginx.
+  - A. One pod should have both containers that run python. The First should install requirements, the second should run an application using those requirements. Describe your choices and describe why It Is an anti-pattern.
+  - B. One pod should have a container that prepares the file exposed on a Port by the other container, which runs nginx.
 4. Expose the previous nginx container using a Kubernetes ingress and makes It reachable from your environment on a FQDN.
 5. List all the pods showing name and namespace with a json path expression.
 6. Prepare an Helm Chart deploying 4.
