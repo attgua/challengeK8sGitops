@@ -9,17 +9,17 @@
     python main.py
 
     ```
-  * In A/docker are presents the 3 Docker images used:
+  * In A/docker are presents the three Docker images used:
     - the first one is used for the test application.
     - the second one is used for install the requirements for the task application.
     - the third one is used for execute the flask server for the task application.
 
-  * in A/Kubernetes are present 2 .yaml files:
+  * in A/Kubernetes are present two .yaml files:
     - the deployment.yaml is used for the test application.
     - the multicontainer-pod1.yaml is used for the task application.
       Inside the multicontainer-pod1.yaml:
-        - tha first container named `python-write` has the image `attgua/python-write:0.1` builded with the second Dockefile.
-        - the second container named `python-execute` has the image `attgua/python-execute:0.1` builded with the third dockerfile.
+        - tha first (init)Container named `python-write` has the image `attgua/python-write:0.15` builded with the second Dockefile and starting first install the requirements on a shared folder.
+        - the second container named `python-execute`, that has the image `attgua/python-execute:0.15`, builded with the third dockerfile, moves the requirements installed in the the right python3 folder and starts the main.py application.
         - the service `hello-python-service` is used to expose the application on the port `30992` so its visible outside the cluster.
 
   * It is an anti-pattern because:

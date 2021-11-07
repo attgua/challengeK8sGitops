@@ -4,13 +4,13 @@ metadata:
   labels:
     run: multicontainer-pod1
   name: multicontainer-pod1
-spec:
 
+spec:
   volumes:
   - name: shared-data
     emptyDir: {}
 
-  containers: 
+  initContainers: 
   - image: attgua/python-write:0.15
     name: python-write
     volumeMounts:
@@ -19,8 +19,9 @@ spec:
     args:
     - bin/sh
     - -c
-    - cp app/main.py home/main.py ; cp app/requirements.txt home/requirements.txt ; cp usr/local/bin/flask /home/flask ; sleep 3600
+    - cp -r app/* home ; pip3 install -r /app/requirements.txt -t /home/req;
 
+  containers:
   - name: python-execute
     ports:
     - containerPort: 5000
@@ -32,19 +33,22 @@ spec:
     args:
     - /bin/sh
     - -c
-    - cp /app/flask /usr/local/bin/flask; pip3 install -r /app/requirements.txt; python3 /app/main.py ; sleep 3600
-  restartPolicy: Never
+    - cp -r /app/req/* /usr/local/lib/python3.10/site-packages; python3 /app/main.py ; sleep 3600
+  restartPolicy: Always
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: hello-python-service
+  name: multicontainer-service
 spec:
   selector:
-    app: multicontainer-pod1
+    run: multicontainer-pod1
   ports:
   - protocol: "TCP"
     port: 6000
     targetPort: 5000
+    nodePort: 30992
+
   type: LoadBalancer
+
