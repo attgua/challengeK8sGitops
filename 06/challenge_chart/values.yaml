@@ -1,0 +1,14 @@
+container1:
+  image: nginx
+  port: 80
+
+container2:
+  image: busybox
+
+service:
+  nodePort: 30991
+  port: 80
+  protocol: TCP
+  targetPort: 80
+  type: LoadBalancer
+

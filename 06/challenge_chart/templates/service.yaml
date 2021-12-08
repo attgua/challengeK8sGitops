@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: {{ .Release.Name }}-exposition-service
+  name: {{ .Release.Name }}-exposition-service
+ # namespace: {{ .Release.Name }}
+spec:
+  ports:
+  - nodePort: {{ .Values.service.nodePort }}
+    port: {{ .Values.service.port }}
+    protocol: {{ .Values.service.Protocl }}
+    targetPort: {{ .Values.service.targetPort }}
+  selector:
+    run: {{ .Release.Name }}-multicontainer-pod2
+  sessionAffinity: None
+  type: {{ .Values.service.type }}
+status:
+  loadBalancer: {}

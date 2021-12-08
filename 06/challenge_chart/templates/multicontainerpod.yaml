@@ -1,0 +1,34 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: {{ .Release.Name }}-multicontainer-pod2
+  name: {{ .Release.Name }}-multicontainer-pod2
+ # namespace: {{ .Release.Name }}
+spec:
+  volumes:
+  - name: shared-data
+    emptyDir: {}
+
+  containers: 
+  - image: {{ .Values.container1.image }}
+    name: {{ .Values.container1.image }}
+    ports:
+    - containerPort: {{ .Values.container1.port }}
+    resources: {}
+    volumeMounts:
+    - name: shared-data
+      mountPath: /usr/share/nginx/html
+
+  - image: {{ .Values.container2.image }}
+    name: {{ .Values.container2.image }}
+    volumeMounts:
+    - name: shared-data
+      mountPath: /pod-data
+    args:
+    - bin/sh
+    - -c
+    - echo hello world; ls; echo Hello from the busybox container > /pod-data/index.html ; sleep 3600
+
+  restartPolicy: Always
+
