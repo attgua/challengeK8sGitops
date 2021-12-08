@@ -1,0 +1,5 @@
+
+roleDeveloper:
+  namespaces:
+    - default
+    - test
