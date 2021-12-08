@@ -7,7 +7,7 @@
   - B. One pod should have a container that prepares the file exposed on a Port by the other container, which runs nginx.
 4. Expose the previous nginx container using a Kubernetes ingress and makes It reachable from your environment on a FQDN.
 5. List all the pods showing name and namespace with a json path expression.
-6. Prepare an Helm Chart deploying 4.
+6. Prepare an Helm Chart deploying 4 (3B).
 7. Prepare and package an Helm Chart that configures RBAC for a list of namespaces. Describe your choices in the Chart README.
 8. Install ArgoCD and create a project that installs 7.
 9. Install a Kubernetes cluster and create a backup of its etcd.

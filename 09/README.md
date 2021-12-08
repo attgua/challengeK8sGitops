@@ -1,7 +1,5 @@
 ## Install a Kubernetes cluster and create a backup of its etcd.
 
-
-
 To create a K8s cluster I chose to use as node 3 machines on Virtualbox with installed Ubuntu server 20.04.
 
 The following are the list of commands which I used and the procedure which I followed.
@@ -119,7 +117,9 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 kubectl create -f https://docs.projectcalico.org/manifests/tigera-operator.yaml 
 kubectl create -f https://docs.projectcalico.org/manifests/custom-resources.yaml
 
-# Eventually untaint master node
+# Eventually remove the taints on the master so it is possible to schedule pods on it.
+kubectl taint nodes --all node-role.kubernetes.io/master-
+
 
 ```
 
@@ -144,90 +144,3 @@ kubeadm join atti-master \
 ```
 
 #### The first 4 point where executed on all the nodes. Point 5 and 6 only on the Master while point 7 on the workers.
-
-
-### *Etcd Backup*
-
-
-```
-
-# Backup certificates
-sudo cp -r /etc/kubernetes/pki backup/
-# Make etcd snapshot
-sudo docker run --rm -v $(pwd)/backup:/backup \
-    --network host \
-    -v /etc/kubernetes/pki/etcd:/etc/kubernetes/pki/etcd \
-    --env ETCDCTL_API=3 \
-    k8s.gcr.io/etcd:3.4.3-0 \
-    etcdctl --endpoints=https://127.0.0.1:2379 \
-    --cacert=/etc/kubernetes/pki/etcd/ca.crt \
-    --cert=/etc/kubernetes/pki/etcd/healthcheck-client.crt \
-    --key=/etc/kubernetes/pki/etcd/healthcheck-client.key \
-    snapshot save /backup/etcd-snapshot-latest.db
-
-# Backup kubeadm-config
-sudo cp /etc/kubeadm/kubeadm-config.yaml backup/
-
-
-```
-
-- The first commnad copies the folder containing all the certificates that kubeadm creates.
-
-- In the second command the idea is to create a snapshot of the etcd database. 
-This is done by communicating with the running etcd instance in Kubernetes and asking it to create a snapshot. 
-The reason for this long command is to avoid messing with etcd running in Kubernetes as much as possible. It launch a separate container using the same docker image that kubeadm used for setting up the cluster (k8s.gcr.io/etcd:3.4.3-0). But in order to communicate with the etcd pod in Kubernetes, it is needed to: 
-  - Use the host network in order to access 127.0.0.1:2379, where etcd is exposed (--network host)
-
-  - Mount the backup folder where it is desidered to save the snapshot (-v $(pwd)/backup:/backup)
-
- - Mount the folder containing the certificates needed to access etcd (-v /etc/kubernetes/pki/etcd:/etc/kubernetes/pki/etcd)
-
- - Specify the correct etcd API version as environment variable (--env ETCDCTL_API=3)
-
- - The actual command for creating a snapshot (etcdctl snapshot save /backup/etcd-snapshot-latest.db)
-
- - Some flags for the etcdctl command:
-      - Specify where to connect to (--endpoints=https://127.0.0.1:2379)
-      
-      - Specify certificates to use (--cacert=..., --cert=..., --key=...)
-
-   *So it is started a docker container with the etcdctl tool installed. It is ordered to create a snapshot of the etcd instance running in the Kubernetes cluster and store it in a backup folder that is mounted from the host.*
-
-- The final command is optional and only relevant if is used as configuration file for kubeadm.
-
-
-When the time has come to restore the control plane, it is necessary to copy back everything from the backup and initiate the control plane again.
-
-
-Restoration:
-
-```
-
-# Restore certificates
-sudo cp -r backup/pki /etc/kubernetes/
-
-# Restore etcd backup
-sudo mkdir -p /var/lib/etcd
-sudo docker run --rm \
-    -v $(pwd)/backup:/backup \
-    -v /var/lib/etcd:/var/lib/etcd \
-    --env ETCDCTL_API=3 \
-    k8s.gcr.io/etcd:3.4.3-0 \
-    /bin/sh -c "etcdctl snapshot restore '/backup/etcd-snapshot-latest.db' ; mv /default.etcd/member/ /var/lib/etcd/"
-
-# Restore kubeadm-config
-sudo mkdir /etc/kubeadm
-sudo cp backup/kubeadm-config.yaml /etc/kubeadm/
-
-# Initialize the master with backup
-sudo kubeadm init --ignore-preflight-errors=DirAvailable--var-lib-etcd \
-    --config /etc/kubeadm/kubeadm-config.yaml
-
-
-```
-
-This is a reversal of the previous steps.
-
-[Resource: https://elastisys.com/backup-kubernetes-how-and-why/] 
-
-
